@@ -38,7 +38,7 @@ a:hover {
     box-shadow: 0px 1px 6px 0px rgba(64,75,191,1);
 }
 .gallery {
-    padding-top: 50px;
+    padding-top: 60px;
 }
 input[name="searchQuery"] {
     box-sizing: border-box;
@@ -67,11 +67,11 @@ button[type="submit"] {
     font-family: inherit;
     font-size: 16px;
     font-weight: 500;
-    background-color: #fafafa;
+    background-color: #e2e2e9;
 
 }
 button[type="submit"]:hover {
- background-color: #cac9d8;
+ background-color: #c0bfd3;
 }
 .gallery {
     display: flex;
@@ -80,7 +80,10 @@ button[type="submit"]:hover {
     gap: 15px;
 }
 .photo-card {
-     max-width: 340px;   
+     max-width: 340px;
+     border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+     box-shadow: 0px 4px 6px 2px rgba(0,0,0,0.5);   
 }
 .info {
     display: flex;
@@ -89,9 +92,6 @@ button[type="submit"]:hover {
     padding-top: 10px;
     padding-bottom: 10px;
     background-color: inherit;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    box-shadow: 0px 1px 6px rgba(46, 47, 66, 0.08), 0px 1px 1px rgba(46, 47, 66, 0.16), 0px 2px 1px rgba(46, 47, 66, 0.08);
 }
 .info-item {
     text-align: center;

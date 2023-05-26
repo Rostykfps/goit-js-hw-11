@@ -13,14 +13,19 @@ const refs = {
 
 let query = '';
 let currentPage = 1;
-const perPage = 10;
+const perPage = 40;
 
 refs.loadMoreBtn.classList.add('is-hidden');
+
+// Відображення великої версії зображення
+let lightbox = new SimpleLightbox('.photo-card a', {
+  captionDelay: 250,
+});
 
 // Нескінченне завантаження зображень під час прокручування сторінки
 const options = {
   root: null,
-  rootMargin: '20px',
+  rootMargin: '200px',
   threshold: 1.0,
 };
 
@@ -29,6 +34,7 @@ function onLoad(entries, observer) {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       currentPage += 1;
+      lightbox.refresh();
 
       showPhotos(query, currentPage);
     }
@@ -58,6 +64,8 @@ function onSearchBtn(event) {
   query = searchValue;
 
   showPhotos(query, currentPage);
+  lightbox.refresh();
+
   return query;
 }
 
@@ -85,9 +93,8 @@ async function showPhotos(query, currentPage = 1) {
     );
   } else if (currentPage === 1) {
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    lightbox.refresh();
   }
-
-  openImages();
 
   // -----------------------------------
   // // Відрображення кнопки Load more
@@ -170,11 +177,4 @@ function createMarkupCards({ hits }) {
             </div>`
     )
     .join('');
-}
-
-// Відображення великої версії зображення
-function openImages() {
-  let lightbox = new SimpleLightbox('.photo-card a', {
-    captionDelay: 250,
-  }).refresh();
 }
