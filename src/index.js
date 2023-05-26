@@ -35,7 +35,6 @@ function onLoad(entries, observer) {
     if (entry.isIntersecting) {
       currentPage += 1;
       lightbox.refresh();
-
       showPhotos(query, currentPage);
     }
   });
@@ -63,8 +62,8 @@ function onSearchBtn(event) {
   refs.gallery.innerHTML = '';
   query = searchValue;
 
-  showPhotos(query, currentPage);
   lightbox.refresh();
+  showPhotos(query, currentPage);
 
   return query;
 }
@@ -93,8 +92,8 @@ async function showPhotos(query, currentPage = 1) {
     );
   } else if (currentPage === 1) {
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-    lightbox.refresh();
   }
+  lightbox.refresh();
 
   // -----------------------------------
   // // Відрображення кнопки Load more
