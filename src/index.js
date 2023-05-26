@@ -1,0 +1,180 @@
+import { getData } from './js/apiService';
+import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import './css/styles.css';
+
+const refs = {
+  search: document.querySelector('.search-form'),
+  gallery: document.querySelector('.gallery'),
+  loadMoreBtn: document.querySelector('.load-more'),
+  target: document.querySelector('.js-guard'),
+};
+
+let query = '';
+let currentPage = 1;
+const perPage = 10;
+
+refs.loadMoreBtn.classList.add('is-hidden');
+
+// Нескінченне завантаження зображень під час прокручування сторінки
+const options = {
+  root: null,
+  rootMargin: '20px',
+  threshold: 1.0,
+};
+
+let observer = new IntersectionObserver(onLoad, options);
+function onLoad(entries, observer) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      currentPage += 1;
+
+      showPhotos(query, currentPage);
+    }
+  });
+}
+
+// Виконання пошуку і відтворення зображень по сабміту
+refs.search.addEventListener('submit', onSearchBtn);
+
+function onSearchBtn(event) {
+  event.preventDefault();
+  currentPage = 1;
+
+  observer.unobserve(refs.target);
+
+  const searchValue = event.currentTarget.elements.searchQuery.value.trim();
+
+  if (!searchValue) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+    return;
+  } else if (searchValue === query) {
+    return;
+  }
+  refs.gallery.innerHTML = '';
+  query = searchValue;
+
+  showPhotos(query, currentPage);
+  return query;
+}
+
+// Відправка запиту та рендерінг галереї
+async function showPhotos(query, currentPage = 1) {
+  const { hits, totalHits } = await getData(query, currentPage);
+  const totalPages = Math.ceil(totalHits / perPage);
+
+  refs.gallery.insertAdjacentHTML('beforeend', createMarkupCards({ hits }));
+
+  if (currentPage === totalPages) {
+    observer.unobserve(refs.target);
+
+    Notiflix.Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
+  } else {
+    observer.observe(refs.target);
+  }
+
+  // Перевірка чи відповідь з сервера не порожня
+  if (hits.length === 0) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+  } else if (currentPage === 1) {
+    Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+  }
+
+  openImages();
+
+  // -----------------------------------
+  // // Відрображення кнопки Load more
+  // showLoadMoreBtn(currentPage, totalPages);
+
+  // // Прокручування сторінки
+  // if (currentPage > 1) {
+  //   smoothScroll();
+  // }
+
+  // -----------------------------------
+}
+
+// -----------------------------------
+// // Відображення кнопки для завантаження наступної групи зображень
+// function showLoadMoreBtn(currentPage, totalPages) {
+//   if (currentPage > 0 && currentPage < totalPages) {
+//     refs.loadMoreBtn.classList.remove('is-hidden');
+//   } else {
+//     refs.loadMoreBtn.classList.add('is-hidden');
+//   }
+// }
+
+// // Відтворення кожної наступної групи зображень
+// refs.loadMoreBtn.addEventListener('click', loadMore);
+
+// function loadMore() {
+//   currentPage += 1;
+//   showPhotos(query, currentPage);
+// }
+
+// // Прокручування сторінки після запиту
+// function smoothScroll() {
+//   const { height: cardHeight } = document
+//     .querySelector('.gallery')
+//     .firstElementChild.getBoundingClientRect();
+//   console.log('cardheight', cardHeight);
+
+//   window.scrollBy({
+//     top: cardHeight * 1,
+//     behavior: 'smooth',
+//   });
+// }
+// -----------------------------------
+
+// Створення розмітки групи зображень
+function createMarkupCards({ hits }) {
+  return hits
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => `<div class="photo-card">
+            <a href="${largeImageURL}">
+            <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+            </a>
+            <div class="info">
+                <p class="info-item">
+                <b>Likes</b>
+                ${likes}
+                </p>
+                <p class="info-item">
+                <b>Views</b>
+                ${views}
+                </p>
+                <p class="info-item">
+                <b>Comments</b>
+                ${comments}
+                </p>
+                <p class="info-item">
+                <b>Downloads</b>
+                ${downloads}
+                </p>
+            </div>
+            </div>`
+    )
+    .join('');
+}
+
+// Відображення великої версії зображення
+function openImages() {
+  let lightbox = new SimpleLightbox('.photo-card a', {
+    captionDelay: 250,
+  }).refresh();
+}
